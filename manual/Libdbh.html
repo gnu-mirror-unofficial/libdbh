@@ -1,0 +1,1626 @@
+<html lang="en">
+<head>
+<title>Disk Based Hashtables (DBH) 64 bit</title>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="description" content="Disk Based Hashtables (DBH) 64 bit">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="top" href="#Top">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Top"></a>
+<p><hr>
+Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
+
+</div>
+
+<h2 class="unnumbered">Disk Based Hashtables (DBH) 64 bit</h2>
+
+<h2 class="chapheading">Name</h2>
+
+<p>Disk Based Hashtables (DBH) 64 bit &mdash; Library to create and manage hash tables residing
+on disk. Associations are made between keys and
+values so that for a given a key the value can be
+found and loaded into memory quickly. Being disk based
+allows for large and persistent hashes. 64 bit support
+allows for hashtables with sizes over 4 Gigabytes on 32
+bit systems. Quantified key generation allows for
+minimum access time on balanced multidimensional trees.
+
+<p class="noindent"><a name="Stability-Level"></a>
+
+<h2 class="chapheading">Stability Level</h2>
+
+<p class="noindent">Stable, unless otherwise indicated
+<a name="Synopsis"></a>
+
+<h2 class="chapheading">Synopsis</h2>
+
+<pre class="example">     
+     #include &lt;dbh.h&gt;
+     
+     #define             DBH_CREATE
+     #define             DBH_DATA                            (dbh)
+     #define             DBH_DATA_SPACE                      (dbh)
+     #define             DBH_ERASED_SPACE                    (dbh)
+     #define             DBH_FILE_VERSION
+     #define             DBH_FORMAT_SPACE                    (dbh)
+     #define             DBH_KEY                             (dbh)
+     #define             DBH_KEYLENGTH                       (dbh)
+     #define             DBH_MAXIMUM_RECORD_SIZE             (dbh)
+     #define             DBH_PARALLEL_SAFE
+     #define             DBH_PATH                            (dbh)
+     #define             DBH_READ_ONLY
+     #define             DBH_RECORDS                         (dbh)
+     #define             DBH_RECORD_SIZE                     (dbh)
+     #define             DBH_THREAD_SAFE
+     #define             DBH_TOTAL_SPACE                     (dbh)
+     #define             DBH_VERSION
+     void                (*DBHashFunc)                       (DBHashTable *dbh);
+     void                (*DBHashFunc2)                      (DBHashTable *dbh,
+                                                              void *data);
+     struct              DBHashTable;
+     #define             FILE_POINTER
+     DBHashTable *       dbh_new                             (const char *path,
+                                                              unsigned char *key_length,
+                                                              int flags);
+     DBHashTable *       dbh_open                            (const char *path);
+     DBHashTable *       dbh_open_ro                         (const char *path);
+     DBHashTable *       dbh_create                          (const char *path,
+                                                              unsigned char key_length);
+     int                 dbh_close                           (DBHashTable *dbh);
+     int                 dbh_destroy                         (DBHashTable *dbh);
+     int                 dbh_erase                           (DBHashTable *dbh);
+     int                 dbh_unerase                         (DBHashTable *dbh);
+     FILE_POINTER        dbh_update                          (DBHashTable *dbh);
+     FILE_POINTER        dbh_load                            (DBHashTable *dbh);
+     unsigned char       dbh_load_address                    (DBHashTable *dbh,
+                                                              FILE_POINTER currentseek);
+     FILE_POINTER        dbh_load_child                      (DBHashTable *dbh,
+                                                              unsigned char key_index);
+     FILE_POINTER        dbh_load_parent                     (DBHashTable *dbh);
+     void                dbh_set_data                        (DBHashTable *dbh,
+                                                              void *data,
+                                                              FILE_POINTER size);
+     void                dbh_set_key                         (DBHashTable *dbh,
+                                                              unsigned char *key);
+     void                dbh_set_recordsize                  (DBHashTable *dbh,
+                                                              int record_size);
+     int                 dbh_set_size                        (DBHashTable *dbh,
+                                                              FILE_POINTER size);
+     int                 dbh_settempdir                      (DBHashTable *dbh,
+                                                              char *temp_dir);
+                         dbh_lock_t;
+     int                 dbh_clear_locks                     (DBHashTable *dbh);
+     int                 dbh_set_lock_timeout                (int seconds);
+     int                 dbh_get_lock_timeout                (void);
+     int                 dbh_set_parallel_lock_attempt_limit (DBHashTable *dbh,
+                                                              int limit);
+     int                 dbh_set_parallel_lock_timeout       (DBHashTable *dbh,
+                                                              int seconds);
+     int                 dbh_lock_read                       (DBHashTable *dbh);
+     int                 dbh_unlock_read                     (DBHashTable *dbh);
+     int                 dbh_lock_write                      (DBHashTable *dbh);
+     int                 dbh_unlock_write                    (DBHashTable *dbh);
+     int                 dbh_mutex_lock                      (DBHashTable *dbh);
+     int                 dbh_mutex_unlock                    (DBHashTable *dbh);
+     FILE_POINTER        dbh_find                            (DBHashTable *dbh,
+                                                              int n);
+     int                 dbh_fanout                          (DBHashTable *dbh,
+                                                              DBHashFunc operate,
+                                                              unsigned char *key1,
+                                                              unsigned char *key2,
+                                                              unsigned char ignore_portion);
+     int                 dbh_sweep                           (DBHashTable *dbh,
+                                                              DBHashFunc operate,
+                                                              unsigned char *key1,
+                                                              unsigned char *key2,
+                                                              unsigned char ignore_portion);
+     int                 dbh_foreach                         (DBHashTable *dbh,
+                                                              DBHashFunc2 operate,
+                                                              void *data);
+     int                 dbh_foreach_fanout                  (DBHashTable *dbh,
+                                                              DBHashFunc operate);
+     int                 dbh_foreach_sweep                   (DBHashTable *dbh,
+                                                              DBHashFunc operate);
+     void                dbh_exit_fanout                     (DBHashTable *dbh);
+     void                dbh_exit_sweep                      (DBHashTable *dbh);
+     int                 dbh_prune                           (DBHashTable *dbh,
+                                                              unsigned char *key,
+                                                              unsigned char subtree_length);
+     int                 dbh_unprune                         (DBHashTable *dbh,
+                                                              unsigned char *key,
+                                                              unsigned char subtree_length);
+     void                dbh_regen_fanout                    (DBHashTable **dbh);
+     void                dbh_regen_sweep                     (DBHashTable **dbh);
+     void                dbh_genkey                          (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+     void                dbh_genkey0                         (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+     void                dbh_genkey2                         (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+     void                dbh_orderkey                        (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n,
+                                                              unsigned char base);
+     struct              dbh_header_t;
+     int                 dbh_info                            (DBHashTable *dbh);
+     int                 dbh_writeheader                     (DBHashTable *dbh);
+</pre>
+<p class="noindent"><a name="Description"></a>
+
+<h2 class="chapheading">Description</h2>
+
+<p>A DBHashTable  provides associations between keys and values which is
+optimized so that given a key, the associated value can be found very
+quickly.
+
+   <p>Note that only one hash record is loaded from disk to memory at any
+given moment for a DBHashTable. Both keys and values should be copied
+into the DBHashTable record, so they need not exist for the lifetime
+of the DBHashTable. This means that the use of static strings and
+temporary strings (i.e. those created in buffers and those returned by
+GTK+ widgets) should be copied with <code>dbh_set_key()</code> (see <a href="#dbh_005fset_005fkey-_005b_005d">dbh_set_key []</a>) and <code>dbh_set_data()</code> (see <a href="#dbh_005fset_005fdata-_005b_005d">dbh_set_data []</a>)
+into the DBHashTable record before being inserted.
+
+   <p>You must be careful to ensure that copied key length matches the defined
+key length of the DBHashTable, and also that the copied data does not
+exceed the maximum length of the DBHashTable record (1024 bytes by
+default, and expandable by <code>dbh_set_size()</code> (see <a href="#dbh_005fset_005fsize-_005b_005d">dbh_set_size []</a>) ). If the DBHashTable record length
+is to be variable, be sure to set the appropriate length before each
+<code>dbh_update()</code> (see <a href="#dbh_005fupdate-_005b_005d">dbh_update []</a>), with <code>dbh_set_recordsize()</code> (see <a href="#dbh_005fset_005frecordsize-_005b_005d">dbh_set_recordsize []</a>), otherwise the record length
+need only be set before the first <code>dbh_update()</code> (see <a href="#dbh_005fupdate-_005b_005d">dbh_update []</a>).
+
+   <p>To create a DBHashTable, use <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>).
+
+   <p>A DBHashTable may be opened (either new or existing) in read-only mode,
+parallel-safe mode or thread-safe mode.
+
+   <p>To insert a key and value into a DBHashTable, use <code>dbh_update()</code> (see <a href="#dbh_005fupdate-_005b_005d">dbh_update []</a>). 
+The DBHashTable will not be modified until this command is given. 
+All changes to the current DBHashTable record only reside in memory. 
+<code>dbh_update()</code> (see <a href="#dbh_005fupdate-_005b_005d">dbh_update []</a>) is necessary to commit the changes to the DBHashTable.
+
+   <p>To lookup a value corresponding to a given key, use <code>dbh_load()</code> (see <a href="#dbh_005fload-_005b_005d">dbh_load []</a>).
+
+   <p>To erase and unerase a key and value, use <code>dbh_erase()</code> (see <a href="#dbh_005ferase-_005b_005d">dbh_erase []</a>) and <code>dbh_unerase()</code> (see <a href="#dbh_005funerase-_005b_005d">dbh_unerase []</a>).
+
+   <p>To call a function for each key and value pair (using a sweep route)
+use <code>dbh_foreach_sweep()</code> (see <a href="#dbh_005fforeach_005fsweep-_005b_005d">dbh_foreach_sweep []</a>) and <code>dbh_sweep()</code> (see <a href="#dbh_005fsweep-_005b_005d">dbh_sweep []</a>).
+
+   <p>To call a function for each key and value pair (using a fanout route)
+use <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>) and <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>).
+
+   <p>To destroy a DBHashTable use <code>dbh_destroy()</code> (see <a href="#dbh_005fdestroy-_005b_005d">dbh_destroy []</a>).
+
+   <p>This is dbh version 2, incompatible with dbh version 1 files. 
+The main difference between the two version is the handling of
+file pointers. In version 1, file pointers were 32 bits in length,
+while in version 2, file pointers are 64 bits in length. 
+This allows for DBHashTables with sizes greater than 2 GBytes.
+
+   <p>`Quantified numbers' are an alternate way to view
+the set of `natural numbers' {1, 2, 3, ...} where
+order is defined in two levels. 
+In `natural numbers' there is only one level of order
+(defined by the &gt; boolean operator). In
+`quantified numbers'
+the first level of order is defined by the `cuanta'
+or quantity. The `cuanta' is obtained by adding all
+the digits of the `quantified number'. 
+Thus, for example, 10022, 5, 32, and 11111 are all equal at the
+first level of order since they all add up to 5. The second level
+or order may be obtained in different manners. In functions <code>dbh_genkey()</code> (see <a href="#dbh_005fgenkey-_005b_005d">dbh_genkey []</a>)
+and <code>dbh_genkey2()</code> (see <a href="#dbh_005fgenkey2-_005b_005d">dbh_genkey2 []</a>) the corresponding order of the
+`natural numbers' from which they are associated is
+<em>not conserved</em>.
+
+   <p>In <code>dbh_orderkey()</code> (see <a href="#dbh_005forderkey-_005b_005d">dbh_orderkey []</a>) the corresponding order of the
+`natural numbers'  from which they are associated
+<em>is conserved</em>, but at a price. 
+The base, or maximum value each digit may reach, must be defined. 
+This effectively puts a limit on the number of keys which may be
+generated for a given number of digits.
+
+   <p>When a <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is constructed with `quantified' keys, the
+maximum amount of disk access instructions generated to access
+any given record is equal to the `cuanta' of the quantified number
+represented by the key. This allows a <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) to be constructed with
+minimum access time across all records.
+
+<p class="noindent"><a name="Details"></a>
+
+<h2 class="chapheading">Details</h2>
+
+<p class="noindent"><a name="DBH_005fCREATE"></a>
+
+<h3 class="heading">DBH_CREATE</h3>
+
+<p><a name="index-DBH_005fCREATE-1"></a>
+<pre class="example">     #define             DBH_CREATE
+</pre>
+   <p>Bit flag for <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) to create a new dbh file on disk,
+overwriting any file with the same name and cleansing all locks.
+
+<p class="noindent"><a name="DBH_005fDATA_005b_005d"></a>
+
+<h3 class="heading">DBH_DATA()</h3>
+
+<p><a name="index-DBH_005fDATA-2"></a>
+<pre class="example">     #define             DBH_DATA(dbh)
+</pre>
+   <p>This macro returns a pointer to the current
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) data area.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fDATA_005fSPACE_005b_005d"></a>
+
+<h3 class="heading">DBH_DATA_SPACE()</h3>
+
+<p><a name="index-DBH_005fDATA_005fSPACE-3"></a>
+<pre class="example">     #define             DBH_DATA_SPACE(dbh)
+</pre>
+   <p>This macro returns  the amount of
+bytes taken up by valid data in the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fERASED_005fSPACE_005b_005d"></a>
+
+<h3 class="heading">DBH_ERASED_SPACE()</h3>
+
+<p><a name="index-DBH_005fERASED_005fSPACE-4"></a>
+<pre class="example">     #define             DBH_ERASED_SPACE(dbh)
+</pre>
+   <p>This macro returns  the amount of
+bytes taken up by erased data in the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fFILE_005fVERSION"></a>
+
+<h3 class="heading">DBH_FILE_VERSION</h3>
+
+<p><a name="index-DBH_005fFILE_005fVERSION-5"></a>
+<pre class="example">     #define DBH_FILE_VERSION 	"DBH_2.0/64bit"
+</pre>
+   <p>Disk Based Hashtables library file version compatibility
+
+<p class="noindent"><a name="DBH_005fFORMAT_005fSPACE_005b_005d"></a>
+
+<h3 class="heading">DBH_FORMAT_SPACE()</h3>
+
+<p><a name="index-DBH_005fFORMAT_005fSPACE-6"></a>
+<pre class="example">     #define             DBH_FORMAT_SPACE(dbh)
+</pre>
+   <p>This macro returns the total amount
+of bytes taken up by the format of the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fKEY_005b_005d"></a>
+
+<h3 class="heading">DBH_KEY()</h3>
+
+<p><a name="index-DBH_005fKEY-7"></a>
+<pre class="example">     #define             DBH_KEY(dbh)
+</pre>
+   <p>This macro returns a pointer to the current
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) key area.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fKEYLENGTH_005b_005d"></a>
+
+<h3 class="heading">DBH_KEYLENGTH()</h3>
+
+<p><a name="index-DBH_005fKEYLENGTH-8"></a>
+<pre class="example">     #define             DBH_KEYLENGTH(dbh)
+</pre>
+   <p>This macro returns the keylenth in bytes associated
+to the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>). The value is fixed when the
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is created with <code>dbh_new</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fMAXIMUM_005fRECORD_005fSIZE_005b_005d"></a>
+
+<h3 class="heading">DBH_MAXIMUM_RECORD_SIZE()</h3>
+
+<p><a name="index-DBH_005fMAXIMUM_005fRECORD_005fSIZE-9"></a>
+<pre class="example">     #define             DBH_MAXIMUM_RECORD_SIZE(dbh)
+</pre>
+   <p>This macro returns the maximum allocated space for
+data in the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) record.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fPARALLEL_005fSAFE"></a>
+
+<h3 class="heading">DBH_PARALLEL_SAFE</h3>
+
+<p><a name="index-DBH_005fPARALLEL_005fSAFE-10"></a>
+<pre class="example">     #define             DBH_PARALLEL_SAFE
+</pre>
+   <p>Bit flag for <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) to use if more than one heavy weight
+process will be accessing the same <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in write mode. 
+If no process will be writing to the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>), then
+<code>DBH_READ_ONLY</code> (see <a href="#DBH_005fREAD_005fONLY">DBH_READ_ONLY</a>) is enough and faster since each process will
+hold a separate memory allocation for the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer.
+
+<p class="noindent"><a name="DBH_005fPATH_005b_005d"></a>
+
+<h3 class="heading">DBH_PATH()</h3>
+
+<p><a name="index-DBH_005fPATH-11"></a>
+<pre class="example">     #define             DBH_PATH(dbh)
+</pre>
+   <p>This macro returns a pointer to a string containing
+the path to the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fREAD_005fONLY"></a>
+
+<h3 class="heading">DBH_READ_ONLY</h3>
+
+<p><a name="index-DBH_005fREAD_005fONLY-12"></a>
+<pre class="example">     #define             DBH_READ_ONLY
+</pre>
+   <p>Bit flag for <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) to open an existing dbh file on disk
+in read only mode.
+
+<p class="noindent"><a name="DBH_005fRECORDS_005b_005d"></a>
+
+<h3 class="heading">DBH_RECORDS()</h3>
+
+<p><a name="index-DBH_005fRECORDS-13"></a>
+<pre class="example">     #define             DBH_RECORDS(dbh)
+</pre>
+   <p>This macro returns the number of records in the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fRECORD_005fSIZE_005b_005d"></a>
+
+<h3 class="heading">DBH_RECORD_SIZE()</h3>
+
+<p><a name="index-DBH_005fRECORD_005fSIZE-14"></a>
+<pre class="example">     #define             DBH_RECORD_SIZE(dbh)
+</pre>
+   <p>This macro returns the size of the current record loaded in
+memory. If no record has been loaded, then the return value
+is not defined.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fTHREAD_005fSAFE"></a>
+
+<h3 class="heading">DBH_THREAD_SAFE</h3>
+
+<p><a name="index-DBH_005fTHREAD_005fSAFE-15"></a>
+<pre class="example">     #define             DBH_THREAD_SAFE
+</pre>
+   <p>Bit flag for <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) to use if more than one thread will be
+accessing the same <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in write mode in parallel. 
+DBH function calls which may be racing each other
+in different threads should be enclosed within a <code>dbh_mutex_lock()</code> (see <a href="#dbh_005fmutex_005flock-_005b_005d">dbh_mutex_lock []</a>) and
+<code>dbh_mutex_unlock()</code> (see <a href="#dbh_005fmutex_005funlock-_005b_005d">dbh_mutex_unlock []</a>). Each DBH table opened with the <code>DBH_THREAD_SAFE</code> (see <a href="#DBH_005fTHREAD_005fSAFE">DBH_THREAD_SAFE</a>)
+attribute will have a specific mutex for this function. 
+If threads are to access the same <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in
+read mode only, then <code>DBH_READ_ONLY</code> (see <a href="#DBH_005fREAD_005fONLY">DBH_READ_ONLY</a>) and separate memory allocation
+for each thread's <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer is more than enough and faster.
+
+   <p>When <code>DBH_THREAD_SAFE</code> (see <a href="#DBH_005fTHREAD_005fSAFE">DBH_THREAD_SAFE</a>) is specified, <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) is automatically mutex
+locked until function completes. The function <code>dbh_close()</code> (see <a href="#dbh_005fclose-_005b_005d">dbh_close []</a>) is also
+automatically locked until completion on tables opened with the
+<code>DBH_THREAD_SAFE</code> (see <a href="#DBH_005fTHREAD_005fSAFE">DBH_THREAD_SAFE</a>) attribute.
+
+<p class="noindent"><a name="DBH_005fTOTAL_005fSPACE_005b_005d"></a>
+
+<h3 class="heading">DBH_TOTAL_SPACE()</h3>
+
+<p><a name="index-DBH_005fTOTAL_005fSPACE-16"></a>
+<pre class="example">     #define             DBH_TOTAL_SPACE(dbh)
+</pre>
+   <p>This macro returns  the total amount
+of bytes taken up by the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBH_005fVERSION"></a>
+
+<h3 class="heading">DBH_VERSION</h3>
+
+<p><a name="index-DBH_005fVERSION-17"></a>
+<pre class="example">     #define DBH_VERSION 		"5.0.15"
+</pre>
+   <p>Disk Based Hashtables library version
+
+<p class="noindent"><a name="DBHashFunc-_005b_005d"></a>
+
+<h3 class="heading">DBHashFunc ()</h3>
+
+<p><a name="index-DBHashFunc-18"></a>
+<pre class="example">     void                (*DBHashFunc)                       (DBHashTable *dbh);
+</pre>
+   <p>Pointer to function to apply during <code>dbh_sweep()</code> (see <a href="#dbh_005fsweep-_005b_005d">dbh_sweep []</a>), <code>dbh_fanout()</code> (see <a href="#dbh_005ffanout-_005b_005d">dbh_fanout []</a>),
+<code>dbh_foreach_sweep()</code> (see <a href="#dbh_005fforeach_005fsweep-_005b_005d">dbh_foreach_sweep []</a>) and <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>).
+
+   <p>This function will be applied to all data records involved
+in the sweep or fanout process
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+</dl>
+
+<p class="noindent"><a name="DBHashFunc2-_005b_005d"></a>
+
+<h3 class="heading">DBHashFunc2 ()</h3>
+
+<p><a name="index-DBHashFunc2-19"></a>
+<pre class="example">     void                (*DBHashFunc2)                      (DBHashTable *dbh,
+                                                              void *data);
+</pre>
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *)
+Pointer to function to apply during <code>dbh_sweep()</code> (see <a href="#dbh_005fsweep-_005b_005d">dbh_sweep []</a>), <code>dbh_fanout()</code> (see <a href="#dbh_005ffanout-_005b_005d">dbh_fanout []</a>),
+<code>dbh_foreach_sweep()</code> (see <a href="#dbh_005fforeach_005fsweep-_005b_005d">dbh_foreach_sweep []</a>) and <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>).
+
+     <br><dt><code>data</code> :<dd>pointer to other data to be passed to function
+
+     <p>This function will be applied to all data records involved
+in the sweep or fanout process
+</dl>
+
+<p class="noindent"><a name="struct-DBHashTable"></a>
+
+<h3 class="heading">struct DBHashTable</h3>
+
+<p><a name="index-DBHashTable-20"></a>
+<pre class="example">     struct DBHashTable {
+       unsigned char branches;
+       FILE_POINTER bytes_userdata;
+       unsigned char *key;
+       void *data;
+       int fd;
+       dbh_header_t *head_info;
+       char *path;
+     };
+</pre>
+   <p><code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is a data structure containing the record information for an open
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) file.
+
+     <dl>
+<dt>unsigned [Cross reference to non-existant ID &ldquo;char&rdquo;] <code>branches</code>;<dd>Maximum toplevel branches
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>bytes_userdata</code>;<dd>size of data record
+
+     <br><dt>unsigned [Cross reference to non-existant ID &ldquo;char&rdquo;] *<code>key</code>;<dd>access key
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;void&rdquo;] *<code>data</code>;<dd>record data pointer
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;int&rdquo;] <code>fd</code>;<dd>file descriptor
+
+     <br><dt><code>dbh_header_t</code> (see <a href="#struct-dbh_005fheader_005ft">struct dbh_header_t</a>) *<code>head_info</code>;<dd>nonvolatile header information
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;char&rdquo;] *<code>path</code>;<dd>file path
+</dl>
+
+<p class="noindent"><a name="FILE_005fPOINTER"></a>
+
+<h3 class="heading">FILE_POINTER</h3>
+
+<p><a name="index-FILE_005fPOINTER-21"></a>
+<pre class="example">     #define             FILE_POINTER
+</pre>
+   <p>Architecture independent 64 bit integer type
+
+<p class="noindent"><a name="dbh_005fnew-_005b_005d"></a>
+
+<h3 class="heading">dbh_new ()</h3>
+
+<p><a name="index-dbh_005fnew-22"></a>
+<pre class="example">     DBHashTable *       dbh_new                             (const char *path,
+                                                              unsigned char *key_length,
+                                                              int flags);
+</pre>
+   <p>Open or create an existing DBH table.  Flag is bitwise or of the following:
+<code>DBH_CREATE</code> (see <a href="#DBH_005fCREATE">DBH_CREATE</a>), <code>DBH_READ_ONLY</code> (see <a href="#DBH_005fREAD_005fONLY">DBH_READ_ONLY</a>), <code>DBH_THREAD_SAFE</code> (see <a href="#DBH_005fTHREAD_005fSAFE">DBH_THREAD_SAFE</a>), <code>DBH_PARALLEL_SAFE</code> (see <a href="#DBH_005fPARALLEL_005fSAFE">DBH_PARALLEL_SAFE</a>). 
+(since 4.7.6)
+
+     <dl>
+<dt><code>path</code> :<dd>Path on disk where DBHashTable resides.
+
+     <br><dt><code>key_length</code> :<dd>A pointer to store the length of the key to access the DBHashTable.
+
+     <br><dt><code>flags</code> :<dd>Bitwise or of
+DBH_CREATE, DBH_READ_ONLY, DBH_THREAD_SAFE, DBH_PARALLEL_SAFE
+
+     <br><dt><em>Returns</em> :<dd>A pointer to the newly opened DBHashTable,
+or NULL if it fails. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fopen-_005b_005d"></a>
+
+<h3 class="heading">dbh_open ()</h3>
+
+<pre class="example">     DBHashTable *       dbh_open                            (const char *path);
+</pre>
+   <blockquote>
+
+   <p><strong>Warning</strong>
+
+   <p>&lsquo;<samp><span class="samp">dbh_open</span></samp>&rsquo; is deprecated and should not be used in newly-written code. Use <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) instead
+</blockquote>
+
+   <p>Open an existing hash in read-write mode.
+
+     <dl>
+<dt><code>path</code> :<dd>Path on disk where DBHashTable resides.
+
+     <br><dt><em>Returns</em> :<dd>A pointer to the newly opened <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>),
+or NULL if it fails. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fopen_005fro-_005b_005d"></a>
+
+<h3 class="heading">dbh_open_ro ()</h3>
+
+<pre class="example">     DBHashTable *       dbh_open_ro                         (const char *path);
+</pre>
+   <blockquote>
+
+   <p><strong>Warning</strong>
+
+   <p>&lsquo;<samp><span class="samp">dbh_open_ro</span></samp>&rsquo; is deprecated and should not be used in newly-written code. Use <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) instead
+</blockquote>
+
+   <p>Open an existing hash in read-only mode.
+
+     <dl>
+<dt><code>path</code> :<dd>Path on disk where DBHashTable resides.
+
+     <br><dt><em>Returns</em> :<dd>A pointer to the newly opened read-only DBHashTable,
+or NULL if it fails. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fcreate-_005b_005d"></a>
+
+<h3 class="heading">dbh_create ()</h3>
+
+<pre class="example">     DBHashTable *       dbh_create                          (const char *path,
+                                                              unsigned char key_length);
+</pre>
+   <blockquote>
+
+   <p><strong>Warning</strong>
+
+   <p>&lsquo;<samp><span class="samp">dbh_create</span></samp>&rsquo; is deprecated and should not be used in newly-written code. Use <code>dbh_new()</code> (see <a href="#dbh_005fnew-_005b_005d">dbh_new []</a>) instead
+</blockquote>
+
+   <p>Create a new hash file (overwriting old version). 
+Creates and opens for writing a new <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>). 
+This function will overwrite any file with the specified
+path, including any previous DBH file. The <code>key_length</code> is
+fixed. If you want variable length, use a g_hash_table
+to associate quantified keys generated by [Cross reference to non-existant ID &ldquo;genkey&rdquo;], and
+create an extra DBHashTable to save the g_hash. 
+Quantified  keys assure that large DBHashes are spread out
+optimally.
+
+     <dl>
+<dt><code>path</code> :<dd>Path on disk where DBHashTable will reside.
+
+     <br><dt><code>key_length</code> :<dd>The length of the key to access the DBHashTable.
+
+     <br><dt><em>Returns</em> :<dd>A pointer to the newly created and opened <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>),
+or NULL if it fails. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fclose-_005b_005d"></a>
+
+<h3 class="heading">dbh_close ()</h3>
+
+<p><a name="index-dbh_005fclose-23"></a>
+<pre class="example">     int                 dbh_close                           (DBHashTable *dbh);
+</pre>
+   <p>Close hash file (thus flushing io buffer).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fdestroy-_005b_005d"></a>
+
+<h3 class="heading">dbh_destroy ()</h3>
+
+<p><a name="index-dbh_005fdestroy-24"></a>
+<pre class="example">     int                 dbh_destroy                         (DBHashTable *dbh);
+</pre>
+   <p>Close an open DBHashTable and erase file from disk. 
+Convenience function that does a close and rm.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005ferase-_005b_005d"></a>
+
+<h3 class="heading">dbh_erase ()</h3>
+
+<p><a name="index-dbh_005ferase-25"></a>
+<pre class="example">     int                 dbh_erase                           (DBHashTable *dbh);
+</pre>
+   <p>Mark the record currently loaded into memory as erased. If no record is
+currently loaded, behaviour is undefined.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005funerase-_005b_005d"></a>
+
+<h3 class="heading">dbh_unerase ()</h3>
+
+<p><a name="index-dbh_005funerase-26"></a>
+<pre class="example">     int                 dbh_unerase                         (DBHashTable *dbh);
+</pre>
+   <p>This is the opposite of <code>dbh_erase()</code> (see <a href="#dbh_005ferase-_005b_005d">dbh_erase []</a>). Mark the record currently loaded
+into memory as unerased. If no record is currently loaded,
+behaviour is undefined.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fupdate-_005b_005d"></a>
+
+<h3 class="heading">dbh_update ()</h3>
+
+<p><a name="index-dbh_005fupdate-27"></a>
+<pre class="example">     FILE_POINTER        dbh_update                          (DBHashTable *dbh);
+</pre>
+   <p>Update the current record in memory to the disk based hash. Update function
+will update erased records as well as unerased records, but if
+an erased record is updated, it is automatically unerased.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, byte offset of loaded record otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fload-_005b_005d"></a>
+
+<h3 class="heading">dbh_load ()</h3>
+
+<p><a name="index-dbh_005fload-28"></a>
+<pre class="example">     FILE_POINTER        dbh_load                            (DBHashTable *dbh);
+</pre>
+   <p>Load a record using the currently set key. This function will also
+load erased values, except that it will return 0.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, byte offset of loaded record otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fload_005faddress-_005b_005d"></a>
+
+<h3 class="heading">dbh_load_address ()</h3>
+
+<p><a name="index-dbh_005fload_005faddress-29"></a>
+<pre class="example">     unsigned char       dbh_load_address                    (DBHashTable *dbh,
+                                                              FILE_POINTER currentseek);
+</pre>
+   <p>Load a record from hash table directly from byte offset <code>currentseek</code>
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>currentseek</code> :<dd>A byte offset.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, number of branches otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fload_005fchild-_005b_005d"></a>
+
+<h3 class="heading">dbh_load_child ()</h3>
+
+<p><a name="index-dbh_005fload_005fchild-30"></a>
+<pre class="example">     FILE_POINTER        dbh_load_child                      (DBHashTable *dbh,
+                                                              unsigned char key_index);
+</pre>
+   <p>Load the first child of the currently loaded record, on branch identified
+by <code>key_index</code>. Since the number of childs (or branches) of each record is
+variable, this may be tricky. Top level records have <code>DBH_KEYLENGTH</code> (see <a href="#DBH_005fKEYLENGTH_005b_005d">DBH_KEYLENGTH[]</a>) branches. 
+Lower level records have less. Each byte of a key represents a branch on
+top level records.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>key_index</code> :<dd>branch number on which to return the child.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, byte offset of loaded record otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fload_005fparent-_005b_005d"></a>
+
+<h3 class="heading">dbh_load_parent ()</h3>
+
+<p><a name="index-dbh_005fload_005fparent-31"></a>
+<pre class="example">     FILE_POINTER        dbh_load_parent                     (DBHashTable *dbh);
+</pre>
+   <p>Load the parent of the currently loaded record.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 on error, byte offset of loaded record otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005fdata-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_data ()</h3>
+
+<p><a name="index-dbh_005fset_005fdata-32"></a>
+<pre class="example">     void                dbh_set_data                        (DBHashTable *dbh,
+                                                              void *data,
+                                                              FILE_POINTER size);
+</pre>
+   <p>This function copies the user data into the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) record
+and along with function <code>dbh_set_key()</code> (see <a href="#dbh_005fset_005fkey-_005b_005d">dbh_set_key []</a>), makes the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>)
+record ready for the <code>dbh_update()</code> (see <a href="#dbh_005fupdate-_005b_005d">dbh_update []</a>) function to commit to the actual
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) on disk.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>data</code> :<dd>Pointer to the data to copy to the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) record
+
+     <br><dt><code>size</code> :<dd>The amount of bytes to copy to the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) record
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005fkey-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_key ()</h3>
+
+<p><a name="index-dbh_005fset_005fkey-33"></a>
+<pre class="example">     void                dbh_set_key                         (DBHashTable *dbh,
+                                                              unsigned char *key);
+</pre>
+   <p>This function sets the key of the current DBHashTable record.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>key</code> :<dd>The key to set as the current DBHashTable record key. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005frecordsize-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_recordsize ()</h3>
+
+<p><a name="index-dbh_005fset_005frecordsize-34"></a>
+<pre class="example">     void                dbh_set_recordsize                  (DBHashTable *dbh,
+                                                              int record_size);
+</pre>
+   <p>This sets the recordsize of the the data in the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>)
+record. It is called implicitly by calling <code>dbh_set_data()</code> (see <a href="#dbh_005fset_005fdata-_005b_005d">dbh_set_data []</a>). It is very
+important to call this function. Unpredictable results will follow if
+record_size is not set. <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) records are variable in length, so
+use this function at least once if you are planning to use fixed length
+records. This function is not needed if <code>dbh_set_data()</code> (see <a href="#dbh_005fset_005fdata-_005b_005d">dbh_set_data []</a>) is used to set
+the record data.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>record_size</code> :<dd>The amount of bytes in the current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) record. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005fsize-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_size ()</h3>
+
+<p><a name="index-dbh_005fset_005fsize-35"></a>
+<pre class="example">     int                 dbh_set_size                        (DBHashTable *dbh,
+                                                              FILE_POINTER size);
+</pre>
+   <p>Defines the maximum amount of memory to be allocated to the
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) records. This is nonvolatile information which
+need to be set only once. The default is 1Kbyte.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>size</code> :<dd>size in bytes.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fsettempdir-_005b_005d"></a>
+
+<h3 class="heading">dbh_settempdir ()</h3>
+
+<p><a name="index-dbh_005fsettempdir-36"></a>
+<pre class="example">     int                 dbh_settempdir                      (DBHashTable *dbh,
+                                                              char *temp_dir);
+</pre>
+   <p>Sets the temporary directory to be used by <code>dbh_regen_sweep()</code> (see <a href="#dbh_005fregen_005fsweep-_005b_005d">dbh_regen_sweep []</a>) or
+<code>dbh_regen_fanout()</code> (see <a href="#dbh_005fregen_005ffanout-_005b_005d">dbh_regen_fanout []</a>). 
+It is usually best to set temporary directory on the same
+filesystem device. The default value for the temporary directory is
+the directory where <code>dbh</code> is located. To reset to default value, send NULL
+as the <code>temp_dir</code>
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>temp_dir</code> :<dd>path to temporary directory to use.
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005flock_005ft"></a>
+
+<h3 class="heading">dbh_lock_t</h3>
+
+<p><a name="index-dbh_005flock_005ft-37"></a>
+<pre class="example">     typedef struct {
+         pid_t write_lock;
+         int write_lock_count;
+         int read_lock_count;
+     } dbh_lock_t;
+</pre>
+     <dl>
+<dt>[Cross reference to non-existant ID &ldquo;pid-t&rdquo;] <code>write_lock</code>;<dd>PID of process holding the write lock or zero.
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;int&rdquo;] <code>write_lock_count</code>;<dd>Number of write locks the PID hold (write locks are recursive).
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;int&rdquo;] <code>read_lock_count</code>;<dd>Number of read locks on DBH table. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fclear_005flocks-_005b_005d"></a>
+
+<h3 class="heading">dbh_clear_locks ()</h3>
+
+<p><a name="index-dbh_005fclear_005flocks-38"></a>
+<pre class="example">     int                 dbh_clear_locks                     (DBHashTable *dbh);
+</pre>
+   <p><code>Returns</code>: 0 if error, 1 otherwise
+
+   <p>Clear dbh file locks associated to <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>)
+Use this function to clean up persistent file locks
+
+   <p>(since 4.7.6)
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *). 
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005flock_005ftimeout-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_lock_timeout ()</h3>
+
+<p><a name="index-dbh_005fset_005flock_005ftimeout-39"></a>
+<pre class="example">     int                 dbh_set_lock_timeout                (int seconds);
+</pre>
+   <p>Sets the default time for obtaining a read/write lock in parallel safe mode. 
+The default value is zero, which means there is no timeout. If there is no
+timeout, file locking will block until lock is secured. Locks may persist
+beyond program life and may be stale if program crashed before unlocking was
+performed. Does not affect currently open dbh files. If the value for a
+currently open dbh file is to be modified, use <code>dbh_set_parallel_lock_timeout()</code> (see <a href="#dbh_005fset_005fparallel_005flock_005ftimeout-_005b_005d">dbh_set_parallel_lock_timeout []</a>)
+as well.
+
+     <dl>
+<dt><code>seconds</code> :<dd>Timeout default for obtaining a read/write lock in parallel safe
+mode.
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005fget_005flock_005ftimeout-_005b_005d"></a>
+
+<h3 class="heading">dbh_get_lock_timeout ()</h3>
+
+<p><a name="index-dbh_005fget_005flock_005ftimeout-40"></a>
+<pre class="example">     int                 dbh_get_lock_timeout                (void);
+</pre>
+   <p>Gets the default time for obtaining a read/write lock in parallel safe mode. 
+The default value is zero, which means there is no timeout. If there is no
+timeout, file locking will block until lock is secured. Locks may persist
+beyond program life and may be stale if program crashed before unlocking was
+performed.
+
+     <dl>
+<dt><em>Returns</em> :<dd>the default timeout in seconds to secure a read/write lock in
+parallel safe mode. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005fparallel_005flock_005fattempt_005flimit-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_parallel_lock_attempt_limit ()</h3>
+
+<pre class="example">     int                 dbh_set_parallel_lock_attempt_limit (DBHashTable *dbh,
+                                                              int limit);
+</pre>
+   <blockquote>
+
+   <p><strong>Warning</strong>
+
+   <p>&lsquo;<samp><span class="samp">dbh_set_parallel_lock_attempt_limit</span></samp>&rsquo; is deprecated and should not be used in newly-written code. Use <code>dbh_set_parallel_lock_timeout()</code> (see <a href="#dbh_005fset_005fparallel_005flock_005ftimeout-_005b_005d">dbh_set_parallel_lock_timeout []</a>) instead. As of
+5.0.10, this function is inoperative. 
+</blockquote>
+
+   <p>Sets the limit on the attempts to lock a parallel protected
+dbh file lock before considering the lock to be stale. Stale
+locks may occur when the calling program crashes while the
+lock is set in either read or write mode. Lock will persist
+in shared memory beyond program crash. Lock may be removed
+manually, or a lock attempt limit on the number of tries
+specified to remove the lock automatically. Each lock attempt
+limit is equal to 1/10th of a second (1E+08 nanoseconds). 
+If limit is set to zero, then lock attempts will continue
+indefinitely.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>limit</code> :<dd>Number of attempts to lock a parallel protected file lock before removing lock.
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005fset_005fparallel_005flock_005ftimeout-_005b_005d"></a>
+
+<h3 class="heading">dbh_set_parallel_lock_timeout ()</h3>
+
+<p><a name="index-dbh_005fset_005fparallel_005flock_005ftimeout-41"></a>
+<pre class="example">     int                 dbh_set_parallel_lock_timeout       (DBHashTable *dbh,
+                                                              int seconds);
+</pre>
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>seconds</code> :<dd>Number of second to try to lock a parallel protected file
+before failing. A value of zero means function will block until lock is
+obtained.
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005flock_005fread-_005b_005d"></a>
+
+<h3 class="heading">dbh_lock_read ()</h3>
+
+<p><a name="index-dbh_005flock_005fread-42"></a>
+<pre class="example">     int                 dbh_lock_read                       (DBHashTable *dbh);
+</pre>
+   <p>Attempts to get a read lock on the dbh file. 
+A file may have any number of readlocks as
+long as no write lock is set. 
+If <code>dbh_set_parallel_lock_timeout()</code> (see <a href="#dbh_005fset_005fparallel_005flock_005ftimeout-_005b_005d">dbh_set_parallel_lock_timeout []</a>) is set to zero
+(that's the default) this function will block
+until lock is secured.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005funlock_005fread-_005b_005d"></a>
+
+<h3 class="heading">dbh_unlock_read ()</h3>
+
+<p><a name="index-dbh_005funlock_005fread-43"></a>
+<pre class="example">     int                 dbh_unlock_read                     (DBHashTable *dbh);
+</pre>
+   <p>Releases a read lock on the dbh file.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005flock_005fwrite-_005b_005d"></a>
+
+<h3 class="heading">dbh_lock_write ()</h3>
+
+<p><a name="index-dbh_005flock_005fwrite-44"></a>
+<pre class="example">     int                 dbh_lock_write                      (DBHashTable *dbh);
+</pre>
+   <p>Attempts to get a write lock on the dbh file. 
+A file can only have one write lock, and when
+write lock is set, no read locks may be secured. 
+If <code>dbh_set_parallel_lock_timeout()</code> (see <a href="#dbh_005fset_005fparallel_005flock_005ftimeout-_005b_005d">dbh_set_parallel_lock_timeout []</a>) is set to zero
+(that's the default) this function will block
+until lock is secured.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005funlock_005fwrite-_005b_005d"></a>
+
+<h3 class="heading">dbh_unlock_write ()</h3>
+
+<p><a name="index-dbh_005funlock_005fwrite-45"></a>
+<pre class="example">     int                 dbh_unlock_write                    (DBHashTable *dbh);
+</pre>
+   <p>Releases a write lock on the dbh file.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005fmutex_005flock-_005b_005d"></a>
+
+<h3 class="heading">dbh_mutex_lock ()</h3>
+
+<p><a name="index-dbh_005fmutex_005flock-46"></a>
+<pre class="example">     int                 dbh_mutex_lock                      (DBHashTable *dbh);
+</pre>
+   <p>Lock the DBHashTable mutex. This is only valid if table was opened
+with the DBH_THREAD_SAFE flag, Otherwise the function does
+nothing.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005fmutex_005funlock-_005b_005d"></a>
+
+<h3 class="heading">dbh_mutex_unlock ()</h3>
+
+<p><a name="index-dbh_005fmutex_005funlock-47"></a>
+<pre class="example">     int                 dbh_mutex_unlock                    (DBHashTable *dbh);
+</pre>
+   <p>Unlock the DBHashTable mutex. This is only valid if table was opened
+with the DBH_THREAD_SAFE flag, Otherwise the function does
+nothing.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005ffind-_005b_005d"></a>
+
+<h3 class="heading">dbh_find ()</h3>
+
+<p><a name="index-dbh_005ffind-48"></a>
+<pre class="example">     FILE_POINTER        dbh_find                            (DBHashTable *dbh,
+                                                              int n);
+</pre>
+   <p>Find the top level subtree FILE_POINTER for the currently loaded record,
+but ignoring the last <code>n</code> branches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>n</code> :<dd>Number of branches to ignore on top record.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, byte offset of loaded record otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005ffanout-_005b_005d"></a>
+
+<h3 class="heading">dbh_fanout ()</h3>
+
+<p><a name="index-dbh_005ffanout-49"></a>
+<pre class="example">     int                 dbh_fanout                          (DBHashTable *dbh,
+                                                              DBHashFunc operate,
+                                                              unsigned char *key1,
+                                                              unsigned char *key2,
+                                                              unsigned char ignore_portion);
+</pre>
+   <p>Apply a function to subtree members of the hash, following a fanout
+trajectory (horizontally through records).
+
+   <p>In order for <code>dbh_fanout()</code> (see <a href="#dbh_005ffanout-_005b_005d">dbh_fanout []</a>) to be extremely fast, you should
+prepare the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) for the trajectory with
+<code>dbh_regen_fanout()</code> (see <a href="#dbh_005fregen_005ffanout-_005b_005d">dbh_regen_fanout []</a>) first. This allows for extremely efficient use
+of hardware and operating system caches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>operate</code> :<dd>The function to apply to each selected member of the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>)
+
+     <br><dt><code>key1</code> :<dd>The key from which to start the fanout or NULL if you don't care. 
+Make sure it is a top level node of a subtree with
+<code>dbh_find()</code> (see <a href="#dbh_005ffind-_005b_005d">dbh_find []</a>) first.
+
+     <br><dt><code>key2</code> :<dd>The key which will trigger an exit condition from the sweep,
+or NULL if don't care.
+
+     <br><dt><code>ignore_portion</code> :<dd>The ignored trailing bytes of key1 which will define the
+magnitud of the subtree to be sweeped, or zero if don't care.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fsweep-_005b_005d"></a>
+
+<h3 class="heading">dbh_sweep ()</h3>
+
+<p><a name="index-dbh_005fsweep-50"></a>
+<pre class="example">     int                 dbh_sweep                           (DBHashTable *dbh,
+                                                              DBHashFunc operate,
+                                                              unsigned char *key1,
+                                                              unsigned char *key2,
+                                                              unsigned char ignore_portion);
+</pre>
+   <p>Apply a function to subtree members of the hash, following a sweep
+trajectory (vertically through branches).
+
+   <p>In order for <code>dbh_sweep()</code> (see <a href="#dbh_005fsweep-_005b_005d">dbh_sweep []</a>) to be extremely fast, you should
+prepare the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) for the trajectory with
+<code>dbh_regen_sweep()</code> (see <a href="#dbh_005fregen_005fsweep-_005b_005d">dbh_regen_sweep []</a>) first. This allows for extremely efficient use
+of hardware and operating system caches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>operate</code> :<dd>The function to apply to each selected member of the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>)
+
+     <br><dt><code>key1</code> :<dd>The key from which to start the sweep or NULL if you don't care. 
+Make sure it is a top level node of a subtree with
+<code>dbh_find()</code> (see <a href="#dbh_005ffind-_005b_005d">dbh_find []</a>) first.
+
+     <br><dt><code>key2</code> :<dd>The key which will trigger an exit condition from the sweep,
+or NULL if don't care.
+
+     <br><dt><code>ignore_portion</code> :<dd>The ignored trailing bytes of key1 which will define the
+magnitud of the subtree to be sweeped, or zero if don't care.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fforeach-_005b_005d"></a>
+
+<h3 class="heading">dbh_foreach ()</h3>
+
+<p><a name="index-dbh_005fforeach-51"></a>
+<pre class="example">     int                 dbh_foreach                         (DBHashTable *dbh,
+                                                              DBHashFunc2 operate,
+                                                              void *data);
+</pre>
+   <p>Apply a function to each member of the hash, following a sweep trajectory. 
+Sweep is done by traversing
+the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in a vertical direction through all branches.
+
+   <p>In order for <code>dbh_foreach_sweep()</code> (see <a href="#dbh_005fforeach_005fsweep-_005b_005d">dbh_foreach_sweep []</a>) to be extremely fast, you should
+prepare the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) for the trajectory with
+<code>dbh_regen_sweep()</code> (see <a href="#dbh_005fregen_005fsweep-_005b_005d">dbh_regen_sweep []</a>) first. This allows for extremely efficient use
+of hardware and operating system caches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>operate</code> :<dd>A  <code>DBHashFunc2()</code> (see <a href="#DBHashFunc2-_005b_005d">DBHashFunc2 []</a>) to execute on all records
+
+     <br><dt><code>data</code> :<dd>pointer to data passed to <code>DBHashFunc2()</code> (see <a href="#DBHashFunc2-_005b_005d">DBHashFunc2 []</a>)
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fforeach_005ffanout-_005b_005d"></a>
+
+<h3 class="heading">dbh_foreach_fanout ()</h3>
+
+<p><a name="index-dbh_005fforeach_005ffanout-52"></a>
+<pre class="example">     int                 dbh_foreach_fanout                  (DBHashTable *dbh,
+                                                              DBHashFunc operate);
+</pre>
+   <p>Apply a function to each member of the hash, following a fanout
+trajectory (horizontally through records). <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>) is done by
+traversing the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in a horizontal direction through all records.
+
+   <p>In order for <code>dbh_foreach_fanout()</code> (see <a href="#dbh_005fforeach_005ffanout-_005b_005d">dbh_foreach_fanout []</a>) to be extremely fast, you should
+prepare the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) for the trajectory with
+<code>dbh_regen_fanout()</code> (see <a href="#dbh_005fregen_005ffanout-_005b_005d">dbh_regen_fanout []</a>) first. This allows for extremely efficient use
+of hardware and operating system caches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>operate</code> :<dd>A  <code>DBHashFunc()</code> (see <a href="#DBHashFunc-_005b_005d">DBHashFunc []</a>) to execute on all records
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fforeach_005fsweep-_005b_005d"></a>
+
+<h3 class="heading">dbh_foreach_sweep ()</h3>
+
+<p><a name="index-dbh_005fforeach_005fsweep-53"></a>
+<pre class="example">     int                 dbh_foreach_sweep                   (DBHashTable *dbh,
+                                                              DBHashFunc operate);
+</pre>
+   <p>Apply a function to each member of the hash, following a sweep trajectory. 
+Sweep is done by traversing
+the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) in a vertical direction through all branches.
+
+   <p>In order for <code>dbh_foreach_sweep()</code> (see <a href="#dbh_005fforeach_005fsweep-_005b_005d">dbh_foreach_sweep []</a>) to be extremely fast, you should
+prepare the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) for the trajectory with
+<code>dbh_regen_sweep()</code> (see <a href="#dbh_005fregen_005fsweep-_005b_005d">dbh_regen_sweep []</a>) first. This allows for extremely efficient use
+of hardware and operating system caches.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>operate</code> :<dd>A  <code>DBHashFunc()</code> (see <a href="#DBHashFunc-_005b_005d">DBHashFunc []</a>) to execute on all records
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fexit_005ffanout-_005b_005d"></a>
+
+<h3 class="heading">dbh_exit_fanout ()</h3>
+
+<p><a name="index-dbh_005fexit_005ffanout-54"></a>
+<pre class="example">     void                dbh_exit_fanout                     (DBHashTable *dbh);
+</pre>
+   <p>Calling this function from within a <code>DBHashFunc</code> (see <a href="#DBHashFunc-_005b_005d">DBHashFunc []</a>) will cause an
+exit of a currently running fanout.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *). 
+</dl>
+
+<p class="noindent"><a name="dbh_005fexit_005fsweep-_005b_005d"></a>
+
+<h3 class="heading">dbh_exit_sweep ()</h3>
+
+<p><a name="index-dbh_005fexit_005fsweep-55"></a>
+<pre class="example">     void                dbh_exit_sweep                      (DBHashTable *dbh);
+</pre>
+   <p>Calling this function from within a <code>DBHashFunc</code> (see <a href="#DBHashFunc-_005b_005d">DBHashFunc []</a>) will cause an
+exit of a currently running sweep.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *). 
+</dl>
+
+<p class="noindent"><a name="dbh_005fprune-_005b_005d"></a>
+
+<h3 class="heading">dbh_prune ()</h3>
+
+<p><a name="index-dbh_005fprune-56"></a>
+<pre class="example">     int                 dbh_prune                           (DBHashTable *dbh,
+                                                              unsigned char *key,
+                                                              unsigned char subtree_length);
+</pre>
+   <p>Erases a whole subtree from the record currently loaded
+into memory. Records are not really removed fisically, but
+rather marked erased so they may be recovered (if not
+overwritten later on). Records are permanently removed after
+<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is reconstructed with <code>dbh_regen_sweep()</code> (see <a href="#dbh_005fregen_005fsweep-_005b_005d">dbh_regen_sweep []</a>) or <code>dbh_regen_fanout()</code> (see <a href="#dbh_005fregen_005ffanout-_005b_005d">dbh_regen_fanout []</a>).
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>key</code> :<dd>key of top level record of subtree to erase.
+
+     <br><dt><code>subtree_length</code> :<dd>number of branches to erase.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005funprune-_005b_005d"></a>
+
+<h3 class="heading">dbh_unprune ()</h3>
+
+<p><a name="index-dbh_005funprune-57"></a>
+<pre class="example">     int                 dbh_unprune                         (DBHashTable *dbh,
+                                                              unsigned char *key,
+                                                              unsigned char subtree_length);
+</pre>
+   <p>Does the opposite of <code>dbh_prune()</code> (see <a href="#dbh_005fprune-_005b_005d">dbh_prune []</a>), marking entire subtree as unerased. 
+May fail to work if records have been overwritten since the
+<code>dbh_prune()</code> (see <a href="#dbh_005fprune-_005b_005d">dbh_prune []</a>) instruction was issued.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><code>key</code> :<dd>key of top level record of subtree to erase.
+
+     <br><dt><code>subtree_length</code> :<dd>number of branches to erase.
+
+     <br><dt><em>Returns</em> :<dd>0 on error, 1 otherwise. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fregen_005ffanout-_005b_005d"></a>
+
+<h3 class="heading">dbh_regen_fanout ()</h3>
+
+<p><a name="index-dbh_005fregen_005ffanout-58"></a>
+<pre class="example">     void                dbh_regen_fanout                    (DBHashTable **dbh);
+</pre>
+   <p>Regenerate the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>), eliminating erased records and
+optimizing disk access and speed for fanout access. 
+This is done by creating a new  <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) where the physical
+structure matches the logical fanout structure. The
+temporary directory where the new <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is created may be set
+with <code>dbh_settempdir()</code> (see <a href="#dbh_005fsettempdir-_005b_005d">dbh_settempdir []</a>). Current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is closed before removed. 
+New <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is opened after renamed.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A pointer to a <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>void. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fregen_005fsweep-_005b_005d"></a>
+
+<h3 class="heading">dbh_regen_sweep ()</h3>
+
+<p><a name="index-dbh_005fregen_005fsweep-59"></a>
+<pre class="example">     void                dbh_regen_sweep                     (DBHashTable **dbh);
+</pre>
+   <p>Regenerate the <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>), eliminating erased records and
+optimizing disk access and speed for sweep access. 
+This is done by creating a new <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) where the physical
+structure matches the logical sweep structure. The
+temporary directory where the new <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is created may be set
+with <code>dbh_settempdir()</code> (see <a href="#dbh_005fsettempdir-_005b_005d">dbh_settempdir []</a>). Current <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is closed before removed. 
+New <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) is opened after renamed.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A pointer to a <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>void. 
+</dl>
+
+<p class="noindent"><a name="dbh_005fgenkey-_005b_005d"></a>
+
+<h3 class="heading">dbh_genkey ()</h3>
+
+<p><a name="index-dbh_005fgenkey-60"></a>
+<pre class="example">     void                dbh_genkey                          (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+</pre>
+   <p>Obtain a key from a secuential series of natural numbers
+(positive integers without zero) which does not conserve the order
+of the natural numbers, but which are optimized for construction
+of a balanced hash tree. These keys are expressed in quantified
+numbers. Digits are offset to the <code>0</code> symbol (+48).
+
+     <dl>
+<dt><code>key</code> :<dd>The address where to put the generated key
+
+     <br><dt><code>length</code> :<dd>The key length
+
+     <br><dt><code>n</code> :<dd>The natural number from which to generate the key
+</dl>
+
+<p class="noindent"><a name="dbh_005fgenkey0-_005b_005d"></a>
+
+<h3 class="heading">dbh_genkey0 ()</h3>
+
+<p><a name="index-dbh_005fgenkey0-61"></a>
+<pre class="example">     void                dbh_genkey0                         (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+</pre>
+   <p>Obtain a key from a secuential series of natural numbers
+(positive integers without zero) which does not conserve the order
+of the natural numbers, but which are optimized for construction
+of a balanced hash tree. These keys are expressed in quantified
+numbers. Digits are not offset.
+
+     <dl>
+<dt><code>key</code> :<dd>The address where to put the generated key
+
+     <br><dt><code>length</code> :<dd>The key length
+
+     <br><dt><code>n</code> :<dd>The natural number from which to generate the key
+</dl>
+
+<p class="noindent"><a name="dbh_005fgenkey2-_005b_005d"></a>
+
+<h3 class="heading">dbh_genkey2 ()</h3>
+
+<p><a name="index-dbh_005fgenkey2-62"></a>
+<pre class="example">     void                dbh_genkey2                         (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n);
+</pre>
+   <p>Obtain a key from a secuential series of natural numbers (positive integers
+without zero) which does not conserve the order of the natural numbers,
+but which are optimized for construction of a balanced hash tree. These
+keys are expressed in quantified numbers. Digits are offset to the <code>A</code> symbol (+65).
+
+     <dl>
+<dt><code>key</code> :<dd>The address where to put the generated key
+
+     <br><dt><code>length</code> :<dd>The key length
+
+     <br><dt><code>n</code> :<dd>The natural number from which to generate the key
+</dl>
+
+<p class="noindent"><a name="dbh_005forderkey-_005b_005d"></a>
+
+<h3 class="heading">dbh_orderkey ()</h3>
+
+<p><a name="index-dbh_005forderkey-63"></a>
+<pre class="example">     void                dbh_orderkey                        (unsigned char *key,
+                                                              unsigned char length,
+                                                              unsigned int n,
+                                                              unsigned char base);
+</pre>
+   <p>Obtain a key from a secuential series of natural numbers
+(positive integers without zero) which conserves the order of
+the natural numbers. This function generates a key that belongs to
+a finite subset of the quantified numbers, but which preserves the
+order of the natural numbers (up to the supreme, of course)
+
+     <dl>
+<dt><code>key</code> :<dd>The address where to put the generated key
+
+     <br><dt><code>length</code> :<dd>The key length
+
+     <br><dt><code>n</code> :<dd>The natural number for which to generate the key
+
+     <br><dt><code>base</code> :<dd>The number system base to use. This will equal the maximum
+number of nodes per branch. This &mdash;along with the keylength&mdash;
+will also define a maximum number of records for the DBHashTable
+</dl>
+
+<p class="noindent"><a name="struct-dbh_005fheader_005ft"></a>
+
+<h3 class="heading">struct dbh_header_t</h3>
+
+<p><a name="index-dbh_005fheader_005ft-64"></a>
+<pre class="example">     struct dbh_header_t {
+       unsigned char n_limit;
+       unsigned char user_chars[5];
+       FILE_POINTER bof;
+       FILE_POINTER erased_space;
+       FILE_POINTER data_space;
+       FILE_POINTER total_space;
+     
+       FILE_POINTER records;
+       FILE_POINTER record_length;
+       FILE_POINTER user_filepointer[6];
+       char version[16];
+       char copyright[128];
+     };
+</pre>
+   <p><code>dbh_header_t</code> (see <a href="#struct-dbh_005fheader_005ft">struct dbh_header_t</a>) is the structural information written at the first 256 bytes of
+a <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) file.
+
+     <dl>
+<dt>unsigned [Cross reference to non-existant ID &ldquo;char&rdquo;] <code>n_limit</code>;<dd>Maximum toplevel branches
+
+     <br><dt>unsigned [Cross reference to non-existant ID &ldquo;char&rdquo;] <code>user_chars</code>[5];<dd>Five unsigned chars available to user
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>bof</code>;<dd>File pointer to root of tree
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>erased_space</code>;<dd>Amount of bytes marked as erased
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>data_space</code>;<dd>Amount of bytes ocuppied by data
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>total_space</code>;<dd>Amount of bytes ocuppied by data and format
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>records</code>;<dd>Number of records
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>record_length</code>;<dd>Maximum record length
+
+     <br><dt><code>FILE_POINTER</code> (see <a href="#FILE_005fPOINTER">FILE_POINTER</a>) <code>user_filepointer</code>[6];<dd>Six 64-bit filepointers available to user
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;char&rdquo;] <code>version</code>[16];<dd>DBHashTable version compatibility information
+
+     <br><dt>[Cross reference to non-existant ID &ldquo;char&rdquo;] <code>copyright</code>[128];<dd>DBH sourcecode distribution copyright and download information
+</dl>
+
+<p class="noindent"><a name="dbh_005finfo-_005b_005d"></a>
+
+<h3 class="heading">dbh_info ()</h3>
+
+<p><a name="index-dbh_005finfo-65"></a>
+<pre class="example">     int                 dbh_info                            (DBHashTable *dbh);
+</pre>
+   <p>Prints  header information to stdout.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="dbh_005fwriteheader-_005b_005d"></a>
+
+<h3 class="heading">dbh_writeheader ()</h3>
+
+<p><a name="index-dbh_005fwriteheader-66"></a>
+<pre class="example">     int                 dbh_writeheader                     (DBHashTable *dbh);
+</pre>
+   <p>Write out the DBHashTable header information. It is advisable
+to call this function inmediately after creation of a new DBHashTable
+to force a buffer flush.
+
+     <dl>
+<dt><code>dbh</code> :<dd>A <code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) pointer (<code>DBHashTable</code> (see <a href="#struct-DBHashTable">struct DBHashTable</a>) *).
+
+     <br><dt><em>Returns</em> :<dd>0 if error, 1 otherwise
+</dl>
+
+<p class="noindent"><a name="See-Also"></a>
+
+<h2 class="chapheading">See Also</h2>
+
+<p class="noindent">[Cross reference to non-existant ID &ldquo;GHashTables&rdquo;]
+
+</body></html>
+
+<!--
+
+Local Variables:
+coding: US-ASCII
+End:
+
+-->
