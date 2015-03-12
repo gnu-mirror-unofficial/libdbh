@@ -153,7 +153,8 @@
 
 <h2>GNU Libdbh</h2>
 
-<p>GNU Libdbh is a small library to create and manage 64-bit disk based hash tables.</p>
+<p>GNU Libdbh is a small library to create and manage 64-bit disk based hash tables. <br>
+Libdbh is quite similar to GNU gdbm, but is intended for increased performance when the number of records in your database is in the millions range or above. To see how libdbh performs against gdbm, see section <a href="#PERFORMANCE">performance</a></p>
 
 
 <h3 id="download">Downloading
@@ -276,6 +277,94 @@ Please use the mailing lists for contact.</dd>
 
 
 </dl>
+<h3 id="PERFORMANCE">Performance</h3>
+<!--***************************************************************************-->
+<p>
+The main difference with gdbm lies in the domain of application. In what follows you will 
+find performance tests results, conducted on a 4 core 4 GB box. The program to reproduce
+these tests is included in the libdbh-5.0.17 tarball, just in case you are interested in 
+testing different setups. The test database consisted of 25M records with variable record 
+data size. The code to generate this database in different formats is also included.
+</p>
+
+<p>
+The first results show the conditions under which libdbh outperforms gdbm. While the number 
+of records accessed from this database is less than a certain value, gdbm outperforms libdbh.
+But as the number of records increases, the amount of memory required by gdbm to manage the 
+associated index hash becomes a limiting factor. On the test setup, once 35K records have 
+been randomly accessed, libdbh begins to outperform gdbm. See <i>graph 1</i>. As the number of
+accesses to the database increases, the performance gain from libdbh becomes quite significant. 
+The results when up to 1M records have been accessed are shown in <i>graph 2</i>. 
+</p>
+
+<p>
+<center><table>
+<tr>
+<td><img src="comparison-1e5.png" width=500><br><center><i>graph 1</i></center></br></td> <td><img src="comparison-1e6.png" width=500><br><center><i>graph 2</i></center></br></td>
+</tr>
+</table></center>
+</p>
+
+<p>
+But the libdbh performance can be enhanced even more. Have you ever tried to do a multiplication
+with Roman numerals? Not much fun. That's why Hindu numerals are so much better. Taking this 
+change of symbolic representation a bit further, could there be a better way to represent 
+numbers, say,  for database index keys? 
+</p>
+
+<p>
+Yes, there are better ways.
+</p>
+
+<p>
+The symbolic representation of natural numbers consists of a series of symbols from a symbol 
+set. The symbol set for binary notation, for example, is {0,1}. As the magnitud of any 
+particular number grows towards infinity, the amount of symbols drawn from the symbol set 
+to represent the number tends to infinity as well. 
+</p>
+
+<p>
+Is there any reason why you cannot do a symbolic permutation of the above? How about a symbol 
+set with infinite cardinality and fixed amount of symbols? You could call this symbolic 
+representation of the natural numbers "quantified". This comes from quantity since the order 
+of the quantified numbers is determined not only by the order of the digits but also by the 
+sum of the symbols. Order is important so a one--to--one relationship can be establish with 
+the natural numbers. Nothing is broken here, you are just looking at numbers from a different 
+perspective.
+</p>
+
+<p>
+To make use of quantified numbers, libdbh has a a few routines to handle index keys this way. 
+But does it actually work?
+</p>
+
+<p>
+It does. The performance difference between a dbh file indexed with 
+hindu numbers and the same data indexed with quantified numbers is shown in <i>graph 3</i>.
+</p>
+<center><table>
+<tr>
+<td><img src="comparison-quantum.png" width=500><br><center><i>graph 3</i></center></br></td>
+</tr>
+</table></center>
+<p>
+
+<p>
+The main performance gain comes from the fact that indexing by quantified numbers allows for 
+the growth of balanced multidimensional trees, much the way Nature works in the forest.
+</p>
+
+<p>
+Put simply, hindu numbers are represented by an infinite amount of symbols from a symbol set 
+of finite cardinality, while quantified numbers are represented by a finite amount of symbols 
+from a set of symbols of infinite cardinality. Both represent the exact same thing. The only 
+difference is that hindu numbers are much more useful for counting with our fingers, while 
+quantified numbers are better handled by computers.
+</p>
+
+
+
+<!--***************************************************************************-->
 <h3 id="general_information">General Information</h3>
 
 <!--***************************************************************************-->
