@@ -1,159 +1,27 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-
-<head>
-<!-- start of server/head-include-1.html -->
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:webmasters@gnu.org" />
-<link rel="icon" type="image/png" href="/graphics/gnu-head-mini.png" />
-<meta name="ICBM" content="42.355469,-71.058627" />
-<meta name="DC.title" content="gnu.org" />
-<!-- end of server/head-include-1.html -->
-
-<!-- end of server/header.html -->
-
-<!-- Parent-Version:  1.77  -->
-
-<!-- This is the template document for GNU web pages.  We use
-     server side includes (#include) for common elements, for
-     instance, the very first line of the file.  If you're reading
-     this in its expanded form, you can retrieve the original source,
-     with the SSI statements intact, from
-     http://web.cvs.savannah.gnu.org/viewvc/*checkout*/www/server/standards/boilerplate.html?root=www&content-type=text%2Fplain
--->
-
-<!-- Instructions for adapting this boilerplate to a new project: -->
-
-<!-- 1. In the line above starting "Parent-Version:", remove the
-        "$Revision...$" from around the revision number,
-        leaving just Parent-Version: and the number. -->
-
-<!-- 2. Replace "libdbh" with the name of your project.
-        You should be able to do this with search and replace;
-        making sure that the search is case insensitive and
-        that the case of the replacement matches the case
-        of the string found. In Emacs, query-replace will do this
-        when case-fold-search and case-replace are both non-nil
-        and both search and replacement string are given in lower case. -->
-
-<!-- 3. Of course update the actual information according to your project,
-        such as mailing lists, project locations, and maintainer name.  -->
-
-<!-- 4. You can use the patch-from-parent script to semi-automate
-        merging future changes to the boilerplate with your file:
-        http://web.cvs.savannah.gnu.org/viewvc/*checkout*/www/server/standards/patch-from-parent?root=www&content-type=text%2Fplain
-        -->
-
-<!-- If you would like to make sure your page validates with HTML5, that
-     would be a good thing.  To do that, change the first line from
-     to /server/html5-header.html before trying the validation.  Maybe
-     someday we will be able to make /server/header be HTML5.  -->
-
+<!--#include virtual="/server/header.html" -->
+<!-- Parent-Version: 1.79 -->
 <title>Libdbh
 - GNU Project - Free Software Foundation</title>
-<!-- begin /server/gnun/initial-translations-list.html -->
-<!-- HTML head: set a flag for further expansion in body-include*.html. -->
-<!-- end /server/gnun/initial-translations-list.html -->
+<style type="text/css">
+<!--
+.container { width: 30em; max-width:100%; text-align:center; margin:auto; }
+.graph { min-width: 20em; max-width: 100%; margin: 1.3em 0; }
+.graph img {width: 100%}
+#content .graph p { margin: 0; }
+.container:after {
+   clear: both; content: ""; display: block;
+   height: 0px; visibility: hidden; width: 0px;
+}
+@media (min-width:66.1em) {
+   .container { width: 61.2em; }
+   .graph { float: left;  width: 30em; margin: .3em; }
+}
+-->
+</style>
+<!--#include virtual="/server/banner.html" -->
+<h2 class="c">GNU Libdbh</h2>
 
-<!-- start of server/banner.html -->
-<!-- start of head-include-2.html -->
-
-<link rel="stylesheet" href="/combo.css" media="screen" />
-<link rel="stylesheet" href="/mini.css" media="handheld" />
-<link rel="stylesheet" href="/layout.css" media="screen" />
-
-<link rel="stylesheet" href="/print.css" media="print" />
-
-<!-- end of head-include-2.html -->
-
-</head>
-<body>
-<div class="inner">
-<!-- start of server/body-include-1.html -->
-
-<div id="toplinks">
- <a href="#content">Skip to main text</a>
-</div> <!-- /toplinks -->
-
-<div id="searcher">
- <form method="get" action="//www.gnu.org/cgi-bin/estseek.cgi">
-  <div>
-  <input name="phrase" id="phrase" type="text" size="18" accesskey="s"
-         value="Why GNU/Linux?" onfocus="this.value=''" />
-  <input type="submit" value="Search" />
-  </div>
- </form>
-</div><!-- /searcher -->
-
-<!-- if initial translation list isn't included before banner.html,
-     then the file may use an old boilerplate that contains
-     div#translations in its body, and we mustn't duplicate it here. -->
-<!-- begin /server/gnun/initial-translations-list.html -->
-<!-- HTML body: expand when this file is previously included in HTML head
-                    unless already expanded.  -->
-<div id="translations">
-<p>
-<span dir="ltr" class="original"><a href="/boilerplate.html">English</a>&nbsp;[en]</span>
-</p>
-</div>
-<!-- end /server/gnun/initial-translations-list.html -->
-
-
-<!-- end of server/body-include-1.html -->
-
-<!-- start of server/body-include-2 -->
-
-<div id="header">
-<div id="fsf-frame">
-<p id="join-fsf"><a href="https://www.fsf.org/associate/support_freedom?referrer=4052">JOIN&nbsp;THE&nbsp;FSF</a></p>
-<div id="fssbox">
-<p><a href="http://www.fsf.org/fss">Free Software Supporter</a></p>
-<form action="https://crm.fsf.org/civicrm/profile/create&amp;reset=1&amp;gid=31" method="post">
- <div>
-  <input name="postURL" type="hidden" value="" />
-  <input type="hidden" name="group[25]" value="1" />
-  <input name="cancelURL" type="hidden" value="https://crm.fsf.org/civicrm/profile?reset=1&amp;gid=31" />
-  <input name="_qf_default" type="hidden" value="Edit:cancel" />
- </div>
- <p>
-  <input type="text" id="frmEmail" name="email-Primary" size="18" maxlength="80"
-         value="email address" onfocus="this.value=''"/>
-  <input type="submit" name="_qf_Edit_next" value="Sign up" />
- </p>
-</form>
-</div><!-- /fssbox -->
-</div><!-- /fsf-frame -->
-
-<div id="gnu-banner">
- <a href="/">
- <img src="/graphics/heckert_gnu.small.png" alt=" [A GNU head] " /><strong>GNU</strong> Operating System</a>
-</div><!-- /gnu-banner -->
-<p id="fsf-support">Sponsored by the <a href="#mission-statement">Free Software Foundation</a></p>
-
-</div><!-- /header -->
-
-<div id="navigation">
-
- <ul>
-  <li id="tabAboutGNU"><a href="/gnu/gnu.html">About&nbsp;GNU</a></li>
-  <li id="tabPhilosophy"><a href="/philosophy/philosophy.html">Philosophy</a></li>
-  <li id="tabLicenses"><a href="/licenses/licenses.html">Licenses</a></li>
-  <li id="tabEducation"><a href="/education/education.html">Education</a></li>
-  <li id="tabSoftware"><a href="/software/software.html">Software</a></li>
-  <li id="tabDoc"><a href="/doc/doc.html">Documentation</a></li>
-  <li id="tabHelp"><a href="/help/help.html">Help&nbsp;GNU</a></li>
- </ul>
-
-</div><!--  /navigation -->
-<!-- end of server/body-include-2 -->
-
-<div id="content">
-<!-- end of server/banner.html -->
-
-<h2>GNU Libdbh</h2>
-
-<p>GNU Libdbh is a small library to create and manage 64-bit disk based hash tables. <br>
+<p>GNU Libdbh is a small library to create and manage 64-bit disk based hash tables. <br />
 Libdbh is quite similar to GNU gdbm, but is intended for increased performance when the number of records in your database is in the millions range or above. To see how libdbh performs against gdbm, see section <a href="#PERFORMANCE">performance</a></p>
 
 
@@ -172,7 +40,7 @@ and also on the main GNU ftp server: (soon)
 on the <a href="/prep/ftp.html">GNU mirrors</a>;
 please
 <a href="http://ftpmirror.gnu.org/libdbh/">use
-a mirror</a> if possible.</p-->
+a mirror</a> if possible.--></p>
 
 
 <h3 id="documentation">Documentation</h3>
@@ -201,8 +69,8 @@ or similar directories on your system.  A brief summary of available commands is
 <li><a href="https://lists.gnu.org/mailman/listinfo/libdbh">libdbh</a>
 is used to discuss most aspects of
 Libdbh,
-including development and enhancement requests, as well as bug reports.<br> 
-Currently this list will also used for general user help and discussion.</li>
+including development and enhancement requests, as well as bug reports.<br /> 
+Currently this list is also used for general user help and discussion.</li>
 </ul>
 
 <p>Announcements about
@@ -237,7 +105,7 @@ can be found at
 (via HTTP) and
 <a href="ftp://alpha.gnu.org/gnu/libdbh/">ftp://alpha.gnu.org/gnu/libdbh/</a>
 (via FTP).
-<br> 
+<br /> 
 The next test release will include variable key size and optional memory key hash with code from another GNU project, <em>gdbm</em>.
 </dd>
 
@@ -292,18 +160,19 @@ The first results show the conditions under which libdbh outperforms gdbm. While
 of records accessed from this database is less than a certain value, gdbm outperforms libdbh.
 But as the number of records increases, the amount of memory required by gdbm to manage the 
 associated index hash becomes a limiting factor. On the test setup, once 35K records have 
-been randomly accessed, libdbh begins to outperform gdbm. See <i>graph 1</i>. As the number of
+been randomly accessed, libdbh begins to outperform gdbm. See <i>graph&nbsp;1</i>. As the number of
 accesses to the database increases, the performance gain from libdbh becomes quite significant. 
-The results when up to 1M records have been accessed are shown in <i>graph 2</i>. 
+The results when up to 1M records have been accessed are shown in <i>graph&nbsp;2</i>. 
 </p>
 
-<p>
-<center><table>
-<tr>
-<td><img src="comparison-1e5.png" width=500><br><center><i>graph 1</i></center></br></td> <td><img src="comparison-1e6.png" width=500><br><center><i>graph 2</i></center></br></td>
-</tr>
-</table></center>
-</p>
+<div class="container">
+<div class="graph">
+<img src="comparison-1e5.png" alt=" [graph 1] " /><p><i>graph 1</i></p>
+</div>
+<div class="graph">
+<img src="comparison-1e6.png" alt=" [graph 2] " /><p><i>graph 2</i></p>
+</div>
+</div>
 
 <p>
 But the libdbh performance can be enhanced even more. Have you ever tried to do a multiplication
@@ -318,7 +187,7 @@ Yes, there are better ways.
 
 <p>
 The symbolic representation of natural numbers consists of a series of symbols from a symbol 
-set. The symbol set for binary notation, for example, is {0,1}. As the magnitud of any 
+set. The symbol set for binary notation, for example, is {0,1}. As the magnitude of any 
 particular number grows towards infinity, the amount of symbols drawn from the symbol set 
 to represent the number tends to infinity as well. 
 </p>
@@ -340,14 +209,14 @@ But does it actually work?
 
 <p>
 It does. The performance difference between a dbh file indexed with 
-hindu numbers and the same data indexed with quantified numbers is shown in <i>graph 3</i>.
+hindu numbers and the same data indexed with quantified numbers is shown in <i>graph&nbsp;3</i>.
 </p>
-<center><table>
-<tr>
-<td><img src="comparison-quantum.png" width=500><br><center><i>graph 3</i></center></br></td>
-</tr>
-</table></center>
-<p>
+
+<div class="container" style="width:30em">
+<div class="graph">
+<img src="comparison-quantum.png" alt=" [graph 3] " /><p><i>graph 3</i></p>
+</div>
+</div>
 
 <p>
 The main performance gain comes from the fact that indexing by quantified numbers allows for 
@@ -374,21 +243,23 @@ quantified numbers are better handled by computers.
 <p>
 If you are a technical guy and want to know how the guts of DBH are arranged around quantified numbers, take a look at this <a href="https://sourceforge.net/p/dbh/dbh/ci/master/tree/doc/dbh.pdf">white paper</a>, which is a first draft of a paper which will be augmented with performance tests.</p>
 
-   <p></p>
+
    <p>DBH adopters usually have very large datasets with a large number of records, very fast access requirements, or very complex datasets. </p>
+
    <p>Similar to XML documents, DBH files allow users to specify complex data structures. In contrast to XML documents, DBH files can contain binary data (in many representations) and allow direct access to parts of the file without first parsing the entire contents. </p>
-   <p></p>
+
    <p>DBH, not surprisingly, allows data objects to be expressed in a very natural manner. DBH supports n-dimensional datasets and each element in the dataset may itself be a complex object. Relational databases offer excellent support for queries based on field matching, but are not well-suited for sequentially processing all records in the database or for subsetting the data based on a multidimensional coordinate-style lookup.</p>
-   <p></p>
-   <p>In-house data formats are often developed by individuals or teams to meet the specific needs of their project. While the initial time to develop and deploy such a solution may be quite low, the results are often not portable, not extensible, and not high-performance. In many cases, the time devoted to extending and maintaining the data management portion of the code takes an increasingly large percentage of the total development effort - in effect reducing the time available for the primary objectives of the project. DBH offers a flexible format and powerful API backed by over years of development history.</p>
-   <p></p>
-   <p></a>How does DBH grow&nbsp;balanced trees? </p>
-   <p>This is done using some concepts borrowed from mathematics. The first one is the concept of natural numbers, {1, 2, 3, ...}. Natural numbers is how we count, and there are infinite, countable and have a certain order. But we must not think that they are the only representation. Any other set which is countable, infinite and has a certain order is the exact same thing, even though they may seem strange or weird. Well constructed DBH tables make use of <em>cuantified numbers</em>, which are a different way of expressing the natural numbers, with a different ordering rule. Assuming that the computation bottleneck is the transfer of data from memory to CPU registers, <em>cuantified numbers</em> is the way index records to guarantee the fastest possible retreival speed. </p>
-   <p></p>
+
+   <p>In-house data formats are often developed by individuals or teams to meet the specific needs of their project. While the initial time to develop and deploy such a solution may be quite low, the results are often not portable, not extensible, and not high-performance. In many cases, the time devoted to extending and maintaining the data management portion of the code takes an increasingly large percentage of the total development effort - in effect reducing the time available for the primary objectives of the project. DBH offers a flexible format and powerful API backed by many years of development history.</p>
+
+   <p>How does DBH grow&nbsp;balanced trees? </p>
+
+   <p>This is done using some concepts borrowed from mathematics. The first one is the concept of natural numbers, {1, 2, 3, ...}. Natural numbers is how we count, and they are infinite, countable and have a certain order. But we must not think that they are the only representation. Any other set which is countable, infinite and has a certain order is the exact same thing, even though they may seem strange or weird. Well constructed DBH tables make use of <em>cuantified numbers</em>, which are a different way of expressing the natural numbers, with a different ordering rule. Assuming that the computation bottleneck is the transfer of data from memory to CPU registers, <em>cuantified numbers</em> is the way of indexing records to guarantee the fastest possible retrieval speed. </p>
+
    <p>In order to minimize access to any record in particular, the dimension of the DBH tree should equal the natural logarithm of the number of records in the DBH file. If the records represented data of the entire population of the Earth, the dimension (or keylenth) of the DBH file would be 22. Considering the human genome contains more than 3.4 billion base pairs, associating a data structure to each base pair would require a dimension of 21. 64-bit DBH garantees that such a DBH files can grow up to 9.2E+18 Bytes in size, enough for an average record size of 2.7 GBytes for each base pair. </p>
-   <p></p>
+
    <p>
-   <a href=doc>HTML documentation</a> and man pages for all function calls will be installed. In the examples subdirectory there is a simple hash example (simple_hash.c) and a more complex example (filesystem.c). Make sure you have a look at them before you start.</p>
+   <a href="doc">HTML documentation</a> and man pages for all function calls will be installed. In the examples subdirectory there is a simple hash example (simple_hash.c) and a more complex example (filesystem.c). Make sure you have a look at them before you start.</p>
    
 <!--******************************************************************************-->
 
@@ -403,47 +274,7 @@ Software Foundation; either version&nbsp;3 of the License, or (at your
 option) any later version.</p>
 
 </div><!-- for id="content", starts in the include above -->
-
-              <!-- begin server/footer-text.html -->
-<div id="fsf-links">
- <ul>
-  <li><a href="/">GNU&nbsp;home&nbsp;page</a></li>
-  <li><a href="http://www.fsf.org/">FSF&nbsp;home&nbsp;page</a></li>
-  <li><a href="/graphics/graphics.html">GNU&nbsp;Art</a></li>
-  <li><a href="/fun/fun.html">GNU&nbsp;Fun</a></li>
-  <li><a href="/people/people.html">GNU's&nbsp;Who?</a></li>
-  <li><a href="http://directory.fsf.org">Free&nbsp;Software&nbsp;Directory</a></li>
-  <li><a href="/server/sitemap.html">Site&nbsp;map</a></li>
- </ul>
-</div><!-- /fsf-links -->
-
-<div id="mission-statement">
-
-<blockquote>
-<p><a href="http://www.fsf.org"><img id="fsfbanner"
-src="/graphics/fsf-logo-notext.png" alt=" [FSF logo] "/></a><strong>&ldquo;Our
-mission is to preserve, protect and promote the freedom to use, study,
-copy, modify, and redistribute computer software, and to defend the
-rights of Free Software users.&rdquo;</strong></p>
-</blockquote>
-
-<p>The <a href="http://www.fsf.org">Free Software Foundation</a> is
-the principal organizational sponsor of the GNU Operating System.
-<strong>Support GNU and the FSF</strong> by <a
-href="http://shop.fsf.org/">buying manuals and gear</a>, <a
-href="https://my.fsf.org/associate/support_freedom?referrer=4052">
-<strong>joining the FSF</strong></a> as an associate member, or making
-a <strong>donation</strong>, either <a
-href="http://donate.fsf.org/">directly to the FSF</a> or <a
-href="http://flattr.com/thing/313733/gnuproject-on-Flattr">via
-Flattr</a>.</p>
-
-<p id="backtotop"><a href="#header">back to top</a></p>
-
-</div><!-- /mission-statement -->
-<!-- end server/footer-text.html -->
-
-
+<!--#include virtual="/server/footer.html" -->
 <div id="footer">
 <div class="unprintable">
 
@@ -452,33 +283,11 @@ Flattr</a>.</p>
 There are also <a href="/contact/">other ways to contact</a>
 the FSF.  Broken links and other corrections or suggestions can be sent
 to <a href="mailto:libdbh@gnu.org">&lt;libdbh@gnu.org&gt;</a>.</p>
-
-<p><!-- TRANSLATORS: Ignore the original text in this paragraph,
-        replace it with the translation of these two:
-
-        We work hard and do our best to provide accurate, good quality
-        translations.  However, we are not exempt from imperfection.
-        Please send your comments and general suggestions in this regard
-        to <a href="mailto:web-translators@gnu.org">
-        &lt;web-translators@gnu.org&gt;</a>.</p>
-
-        <p>For information on coordinating and submitting translations of
-        our web pages, see <a
-        href="/server/standards/README.translations.html">Translations
-        README</a>. -->
-<!--
-Please see the <a
-href="/server/standards/README.translations.html">Translations
-README</a> for information on coordinating and submitting translations
-of this article.
--->
-
-</p>
 </div>
 
 <!-- Regarding copyright, in general, standalone pages (as opposed to
      files generated as part of manuals) on the GNU web server should
-     be under CC BY-ND 3.0 US.  Please do NOT change or remove this
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
      without talking with the webmasters or licensing team first.
      Please make sure the copyright date is consistent with the
      document.  For web pages, it is ok to list just the latest year the
@@ -496,21 +305,14 @@ of this article.
 <p>Copyright &copy; 2014 Free Software Foundation, Inc.</p>
 
 <p>This page is licensed under a <a rel="license"
-href="http://creativecommons.org/licenses/by-nd/3.0/us/">Creative
-Commons Attribution-NoDerivs 3.0 United States License</a>.</p>
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
 
-<!-- start of server/bottom-notes.html -->
-<div class="unprintable">
-<p><a href="http://www.fsf.org/about/dmca-notice">Copyright Infringement Notification</a></p>
-
-
-</div>
-<!-- end of server/bottom-notes.html -->
-
+<!--#include virtual="/server/bottom-notes.html" -->
 
 <p class="unprintable">Updated:
 <!-- timestamp start -->
-Fri May 16 10:38:47 CDT 2014
+$Date: 2016/05/02 22:05:58 $
 <!-- timestamp end -->
 </p>
 </div>
